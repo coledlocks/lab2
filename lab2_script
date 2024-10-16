@@ -1,14 +1,208 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct 10 11:00:36 2024
+lab2_script.py
+
+
+Cole Drozdek and Kaelen Kenna
+"""
+# importing related packages
+import sounddevice as sd
+import numpy as np
+from matplotlib import pyplot as plt
+from scipy.io.wavfile import read
+import lab2_module as l2m
+
+#%% PART 1
+# create time vector
+dt = 0.01
+time = np.arange(0, 5.01, dt)
+
+input_signal = np.sin(6 * np.pi * time)
+
+system_impulse = np.zeros_like(time)
+system_impulse[time>=0.5] = 1
+system_impulse[time>=2] = 0
+
+input_signal_scaled = 2 * input_signal
+
+# convolving statements
+x_conv_h = np.convolve(input_signal, system_impulse)
+h_conv_x = np.convolve(system_impulse, input_signal)
+x_scaled_conv_h = np.convolve(input_signal_scaled, system_impulse)
+
+convolve_times = np.arange(0, len(x_conv_h))/(1/dt)
+
+# plotting the 3x3 subplots
+plt.figure(1, clear=True)
+plt.subplot(3, 3, 1)
+plt.plot(time, input_signal)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 2)
+plt.plot(time, system_impulse)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 3)
+plt.plot(convolve_times, x_conv_h)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 4)
+plt.plot(time, system_impulse)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 5)
+plt.plot(time, input_signal)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 6)
+plt.plot(convolve_times, h_conv_x)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 7)
+plt.plot(time, input_signal_scaled)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 8)
+plt.plot(time, system_impulse)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.subplot(3, 3, 9)
+plt.plot(convolve_times, x_scaled_conv_h)
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.tight_layout()
+
+#%% PART 2
+
+my_convolved_signal = l2m.get_convolved_signal(input_signal, system_impulse)
+
+# plotting the manually made convolved signal
+plt.figure(2, clear=True)
+plt.plot(convolve_times, my_convolved_signal)
+
+# annotating the plot
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+
+# comparing the two arrays
+if np.array_equal(x_conv_h, my_convolved_signal) == True:
+    print('the convolutions are equal!')
+else:
+    print('the convolutions are not equal!')
+    
 #%% PART 3
+
 # create time vector
 dt = 0.01
 drug_time = np.arange(0, 50.01, dt)
 
 drug_dosage = 1 - (np.cos(0.25 * np.pi * drug_time))
 
-# simplify body impulse 
-gut_impulse = 0.25 * np.exp(drug_time/0.25) * drug_dosage
-blood_impulse = 
-kidney_impulse = np.exp(-2 * (drug_time - 1)**2
-body_impulse =
+# individual parts of the body response
+gut_impulse = 0.25 * np.exp(-1 * (drug_time/0.4)) * drug_dosage
+blood_impulse = 1 - (np.cos(0.25 * np.pi * (-1 * drug_time)))
+kidney_impulse = np.exp(-2 * (drug_time - 1)**2)
+
+# simplifying into one body response
+body_impulse = np.convolve(np.convolve(gut_impulse, blood_impulse), kidney_impulse)
+
+# convolving with the initial drug_dosage
+output_signal = np.convolve(drug_dosage, body_impulse)
+
+body_convolved_times = np.arange(0, len(output_signal))/(1/dt)
 
 # plot y(t) body response
+plt.figure(3, clear=True)
+plt.plot(body_convolved_times, output_signal)
+
+# for loops to iterate through changes in input signal
+for denom_idx in range(2, 7, 2):
+    for amp_idx in range(0, 4):  
+            input_signal = amp_idx - (np.cos((1/denom_idx) * np.pi * drug_time))
+            l2m.run_drug_simulations(input_signal, body_impulse, 0.01, f'amp: {amp_idx}, denom: {denom_idx}')
+
+plt.legend()
+
+plt.tight_layout()
+
+#%% PART 4
+
+fname = "209735__yummie__minion_laugh_3.wav"
+fs, wav_data = read(fname)
+# sd.play(wav_data)
+mono_data = np.mean(wav_data, axis=1)
+audio_times = np.arange(0, len(mono_data))/fs
+# sd.play(2*wav_data)
+# sd.play(0.5 * wav_data)
+
+# plotting the audio
+plt.figure(4, clear=True)
+plt.plot(audio_times, mono_data)
+
+# part explanations
+
+print('part f: it looks like the audio file that we dowloaded from freesound.org; the graph peaks when there is noise in the recording')
+print('\n')
+print('part g: I thought that it was going to change the audio\'s speed, but it changed the pitch and quality of the audio')
+print('\n')
+print('part h: we thought it would be lower pitched, instead it was SO LOUD and freaky sounding')
+print('\n')
+
+# loading the highpass/lowpass filters
+lowpass = np.loadtxt('LPF_1000Hz_fs44100_n10001.txt')
+highpass = np.loadtxt('HPF_1000Hz_fs44100_n10001.txt')
+
+high_conv = np.convolve(mono_data, highpass)
+low_conv = np.convolve(mono_data, lowpass)
+
+# sd.play(high_conv)
+print('part i: the highpass filter made it really loud and compressed the sound so it sounded crackly and increased the pitch')
+print('\n')
+# sd.play(low_conv)
+print('part j: the lowpass filter made it really loud but smoothed out the sound and lowered the pitch')
+print('\n')
+
+# designing a filter
+filter_up = np.arange(0, 0.02, 0.0004)
+filter_down = np.arange(0.02, -0.0004, -0.0004)
+filter_total = np.concatenate([filter_up, filter_down])
+
+# convolving with our bandpass filter
+band_conv = np.convolve(mono_data, filter_total)
+# sd.play(band_conv)
+
+print('part k: this is a bandpass filter! it sounded similar to the lowpass filter  with an added blip at the beginnig')
+print('\n')
+
+# making array h
+h = np.zeros(100001)
+h[[0, 100000]] = 1
+
+h_conv = np.convolve(mono_data, h)
+# sd.play(h_conv)
+print('part l: it played the sound twice, quite loudly and quickly both times with a large break in between')
+
+# creating impulse response from environment
+
+fs, clap_data = read('stairwayclap.wav')
+
+stair_conv = np.convolve(mono_data, clap_data)
+t = np.arange(0, len(stair_conv))/fs
+
+plt.figure(5)
+plt.plot(t, stair_conv)
+
+# sd.play(stair_conv)
+
+print('part m: we recorded a clap in an empty stairway; it made the sound much longer-- very loud and shrill, tapered towards the end.')
+
+
+
+
+
+
+
+
+
