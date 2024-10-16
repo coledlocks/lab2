@@ -97,19 +97,8 @@ plt.xlabel('time (secs)')
 plt.ylabel('amplitude (a.u.)')
 
 #%% PART 3
-# create time vector
-dt = 0.01
-drug_time = np.arange(0, 50.01, dt)
-
-drug_dosage = 1 - (np.cos(0.25 * np.pi * drug_time))
-
-# simplify body impulse 
-gut_impulse = 0.25 * np.exp(drug_time/0.25) * drug_dosage
-blood_impulse = 
-kidney_impulse = np.exp(-2 * (drug_time - 1)**2
-body_impulse =
-
-# plot y(t) body response
+def run_drug_simulations(input_signal, system_impulse, dt, label):
+    y_t = np.convolve(input_signal, system_impulse) * dt
 
 #%% PART 4
 
