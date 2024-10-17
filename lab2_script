@@ -122,10 +122,15 @@ for denom_idx in range(2, 7, 2):
     for amp_idx in range(0, 4):  
             input_signal = amp_idx - (np.cos((1/denom_idx) * np.pi * drug_time))
             l2m.run_drug_simulations(input_signal, body_impulse, 0.01, f'amp: {amp_idx}, denom: {denom_idx}')
-
+# annotating graph
+plt.xlabel('time (secs)')
+plt.ylabel('amplitude (a.u.)')
+plt.title('response to different drug dosage inputs')
 plt.legend()
 
 plt.tight_layout()
+
+print('I would use the deominator 2 as it had the least amount of fluctuations in the graph and amplitude of 2 as that was the closest to peaking at a power of 10.')
 
 #%% PART 4
 
