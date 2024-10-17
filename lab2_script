@@ -130,11 +130,12 @@ plt.tight_layout()
 #%% PART 4
 
 fname = "209735__yummie__minion_laugh_3.wav"
-fs, wav_data = read(fname)
+fname2 = "greatpumpkinwaltz.wav"
+fs, wav_data = read(fname2)
 # sd.play(wav_data)
 mono_data = np.mean(wav_data, axis=1)
 audio_times = np.arange(0, len(mono_data))/fs
-# sd.play(2*wav_data)
+# sd.play(2 * wav_data)
 # sd.play(0.5 * wav_data)
 
 # plotting the audio
@@ -147,15 +148,20 @@ print('part f: it looks like the audio file that we dowloaded from freesound.org
 print('\n')
 print('part g: I thought that it was going to change the audio\'s speed, but it changed the pitch and quality of the audio')
 print('\n')
-print('part h: we thought it would be lower pitched, instead it was SO LOUD and freaky sounding')
+print('part h: we thought it would be lower pitched, instead it was SO LOUD and crackly sounding')
 print('\n')
 
 # loading the highpass/lowpass filters
 lowpass = np.loadtxt('LPF_1000Hz_fs44100_n10001.txt')
 highpass = np.loadtxt('HPF_1000Hz_fs44100_n10001.txt')
 
+# highpass convolution/saving as a txt file
 high_conv = np.convolve(mono_data, highpass)
+np.savetxt('highpass.txt', high_conv)
+
+# lowpass convolution/saving as a txt file
 low_conv = np.convolve(mono_data, lowpass)
+np.savetxt('lowpass.txt', low_conv)
 
 # sd.play(high_conv)
 print('part i: the highpass filter made it really loud and compressed the sound so it sounded crackly and increased the pitch')
@@ -169,37 +175,35 @@ filter_up = np.arange(0, 0.02, 0.0004)
 filter_down = np.arange(0.02, -0.0004, -0.0004)
 filter_total = np.concatenate([filter_up, filter_down])
 
-# convolving with our bandpass filter
+# convolving with our bandpass filter/saving as a txt file
 band_conv = np.convolve(mono_data, filter_total)
+np.savetxt('bandpass.txt', band_conv)
 # sd.play(band_conv)
 
-print('part k: this is a bandpass filter! it sounded similar to the lowpass filter  with an added blip at the beginnig')
+print('part k: this is a bandpass filter. it sounded similar to the lowpass filter but almost a bit more static involved')
 print('\n')
 
 # making array h
 h = np.zeros(100001)
 h[[0, 100000]] = 1
 
+# convolving the homemade array and the song/saving as a txt file
 h_conv = np.convolve(mono_data, h)
+np.savetxt('h.txt', h_conv)
 # sd.play(h_conv)
-print('part l: it played the sound twice, quite loudly and quickly both times with a large break in between')
+print('part l: it played the sound twice, they overlapped but you could hear when it restarted. still very loud and crackly')
 
 # creating impulse response from environment
 
 fs, clap_data = read('stairwayclap.wav')
 
+# convolving our echo/saving as a txt file
 stair_conv = np.convolve(mono_data, clap_data)
-t = np.arange(0, len(stair_conv))/fs
-
-plt.figure(5)
-plt.plot(t, stair_conv)
+np.savetxt('stairway.txt', stair_conv)
 
 # sd.play(stair_conv)
 
 print('part m: we recorded a clap in an empty stairway; it made the sound much longer-- very loud and shrill, tapered towards the end.')
-
-
-
 
 
 
