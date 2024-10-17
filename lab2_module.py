@@ -45,10 +45,14 @@ def run_drug_simulations(input_signal, system_impulse, dt, label):
 
     Parameters
     __________
-    input_signal : 
-    system_impulse :
-    dt :
-    label :
+    input_signal : Array of float, size: (,)
+          Input signal at each time point dt.
+    system_impulse : Array of int, size: (,)
+        A rectangular pulse function displayed as an array of ints.
+    dt : Array of float, size: (,)
+        Time vector from 0 to 50 seconds inclusive with a step size of 0.01 seconds.
+    label : str
+        Label describing line that is being plotted
 
     Returns
     _______
